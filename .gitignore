@@ -12,3 +12,9 @@ __pycache__/
 # Ignore environment variables files
 .env
 .venv
+
+venv/
+.ipynb_checkpoints/
+__pycache__/
+*.csv
+

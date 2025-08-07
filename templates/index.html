@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Predicción de MPG</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+            circle at 20% 80%,
+            rgba(120, 119, 198, 0.3) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 20%,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 40% 40%,
+            rgba(120, 119, 198, 0.2) 0%,
+            transparent 50%
+          );
+        z-index: 0;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 32px 64px rgba(0, 0, 0, 0.15),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 500px;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+        transform: translateY(0);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      }
+
+      h2 {
+        color: #2d3748;
+        text-align: center;
+        margin-bottom: 32px;
+        font-size: 28px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+      }
+
+      h2::after {
+        content: "";
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 2px;
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+        position: relative;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: color 0.3s ease;
+      }
+
+      input {
+        width: 100%;
+        padding: 16px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1),
+          inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        transform: translateY(-2px);
+      }
+
+      input:focus + label,
+      input:not(:placeholder-shown) + label {
+        color: #667eea;
+      }
+
+      input:hover {
+        border-color: #cbd5e0;
+        transform: translateY(-1px);
+      }
+
+      button {
+        width: 100%;
+        padding: 18px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+      }
+
+      button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(102, 126, 234, 0.4);
+      }
+
+      button:hover::before {
+        left: 100%;
+      }
+
+      button:active {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      #result {
+        margin-top: 32px;
+        padding: 20px;
+        background: linear-gradient(135deg, #e6fffa 0%, #f0fff4 100%);
+        border: 2px solid #48bb78;
+        border-radius: 12px;
+        font-weight: 600;
+        color: #2f855a;
+        text-align: center;
+        font-size: 18px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 16px rgba(72, 187, 120, 0.1);
+      }
+
+      #result:not(:empty) {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      #result p {
+        margin: 0;
+        position: relative;
+      }
+
+      #result p::before {
+        content: "🚗";
+        margin-right: 8px;
+        font-size: 20px;
+      }
+
+      /* Animaciones adicionales */
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .container::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+        border-radius: 26px;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .container:hover::before {
+        opacity: 0.1;
+      }
+
+      /* Efectos de partículas sutiles */
+      .form-group::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at center,
+          rgba(102, 126, 234, 0.02) 0%,
+          transparent 70%
+        );
+        border-radius: 12px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+
+      .form-group:hover::after {
+        opacity: 1;
+      }
+
+      /* Responsive design */
+      @media (max-width: 480px) {
+        .container {
+          padding: 24px;
+          margin: 16px;
+        }
+
+        h2 {
+          font-size: 24px;
+        }
+
+        input,
+        button {
+          padding: 14px 16px;
+        }
+      }
+
+      /* Animación de entrada */
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .container {
+        animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .form-group {
+        animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        animation-fill-mode: both;
+      }
+
+      .form-group:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .form-group:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .form-group:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      .form-group:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+      button {
+        animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s both;
+      }
+      .select-age {
+        width: 100%;
+        padding: 16px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 16px;
+        background: rgba(255, 255, 255, 0.8);
+        font-family: inherit;
+        transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+          box-shadow 0.3s;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        color: #4a5568;
+        margin-bottom: 8px;
+        appearance: none; /* Elimina el estilo nativo */
+      }
+      .select-age:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+      .select-age {
+        background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M6 8L10 12L14 8' stroke='%23667eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 1.5em;
+        padding-right: 40px; /* Espacio para la flecha */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Predicción automática</h2>
+      <form method="POST" action="/">
+        <div class="form-group">
+          <label for="lstat"
+            >LSTAT (Porcentaje de población con bajo estatus):</label
+          >
+          <input type="number" id="lstat" name="lstat" step="0.01" required />
+        </div>
+        <div class="form-group">
+          <label for="cat_age">EDAD DE LA CASA:</label>
+          <select id="cat_age" name="cat_age" class="select-age" required>
+            <option value="" disabled selected>Selecciona una opción</option>
+            <option value="Joven">Joven</option>
+            <option value="Casi nueva">Casi nueva</option>
+            <option value="Adulto">Adulto</option>
+            <option value="Viejo">Viejo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="crim">CRIM (Tasa de criminalidad):</label>
+          <input type="number" id="crim" name="crim" step="0.00001" required />
+        </div>
+        <div class="form-group">
+          <label for="rm">RM (Promedio de habitaciones):</label>
+          <input type="number" id="rm" name="rm" step="0.01" required />
+        </div>
+        <div class="form-group">
+          <label for="palux">PALUX (Característica personalizada):</label>
+          <input type="number" id="palux" name="palux" step="0.0001" required />
+        </div>
+        <div class="form-group">
+          <label for="garb">GARB (Característica personalizada):</label>
+          <input type="number" id="garb" name="garb" step="0.0001" required />
+        </div>
+        <button type="submit">Predecir</button>
+      </form>
+      <div id="result">
+        {% if prediction is not none %}
+        <p>Predicción: {{ prediction }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>
