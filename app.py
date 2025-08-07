@@ -10,7 +10,13 @@ model = joblib.load('modelo_mlp.pkl')
 scaler = joblib.load('scaler.pkl')
 
 # Mappings de variables categóricas (ajusta si tus categorías cambian)
-map_cat_age = {'Joven': 0, 'Adulto': 1, 'Viejo': 2, 'Casi nueva': 3}
+map_cat_age = {
+    'Muy antigua': 0,
+    'Antigua': 1,
+    'Casi nueva': 2,
+    'Nueva': 3
+}
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
