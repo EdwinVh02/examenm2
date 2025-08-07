@@ -390,7 +390,21 @@
           <label for="garb">GARB (Característica personalizada):</label>
           <input type="number" id="garb" name="garb" step="0.0001" required />
         </div>
-        <button type="submit">Predecir</button>
+        <div style="display: flex; gap: 16px; margin-top: 8px">
+          <button type="submit">Predecir</button>
+          {% if prediction is not none %}
+          <button
+            type="button"
+            onclick="limpiarFormulario()"
+            style="
+              background: linear-gradient(135deg, #e53e3e 0%, #f56565 100%);
+              color: #fff;
+            "
+          >
+            Limpiar datos
+          </button>
+          {% endif %}
+        </div>
       </form>
       <div id="result">
         {% if prediction is not none %}
@@ -399,4 +413,9 @@
       </div>
     </div>
   </body>
+  <script>
+    function limpiarFormulario() {
+      document.querySelector("form").reset();
+    }
+  </script>
 </html>
